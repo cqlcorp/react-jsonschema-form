@@ -3,6 +3,7 @@ import Ajv from "ajv";
 const ajv = new Ajv({
   errorDataPath: "property",
   allErrors: true,
+  ownProperties: true,
   multipleOfPrecision: 8,
 });
 // add custom formats
