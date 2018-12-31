@@ -120,18 +120,11 @@ function unwrapErrorHandler(errorHandler) {
 }
 
 function getPathToMessages(path){
-  var result = [];
+  path.split("/").slice(1);
+  path.pop();
+  path.push('messages');
 
-  path.split("/").slice(1).forEach(function(elem){
-      if(elem !== '#') {
-        result.push(elem); 
-      }
-  });
-
-  result.pop();
-  result.push('messages');
-
-  return result;
+  return path;
 }
 
 /**
