@@ -144,7 +144,7 @@ function transformAjvErrors(errors = [], schema) {
     const { dataPath, keyword, message, params, schemaPath } = e;
     let property = `${dataPath}`;
 
-    var messages = _.get(schema.properties,convertPath(schemaPath));
+    var messages = _.get(schema,convertPath(schemaPath));
     var customMessage = messages ? messages[keyword] : message;
 
 
