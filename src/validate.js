@@ -119,15 +119,18 @@ function unwrapErrorHandler(errorHandler) {
   }, {});
 }
 
-function convertPath(path){
+function getPathToMessages(path){
   var result = [];
+
   path.split("/").slice(1).forEach(function(elem){
       if(elem !== '#') {
         result.push(elem); 
       }
   });
+
   result.pop();
-  result.push('messages')
+  result.push('messages');
+
   return result;
 }
 
@@ -144,17 +147,15 @@ function transformAjvErrors(errors = [], schema) {
     const { dataPath, keyword, message, params, schemaPath } = e;
     let property = `${dataPath}`;
 
-    var messages = _.get(schema,convertPath(schemaPath));
-    var customMessage = messages ? messages[keyword] : message;
-
+    const messagesObj = _.get(schema, getPathToMessages(schemaPath));
+    const messageToDisplay = messagesObj ? messagesObj[keyword] : message;
 
     // put data in expected format
     return {
       name: keyword,
       property,
-      message: customMessage,
+      message: messageToDisplay,
       params, // specific to ajv
-      e,
       stack: `${property} ${message}`.trim(),
     };
   });
