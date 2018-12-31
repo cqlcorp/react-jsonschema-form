@@ -3,7 +3,6 @@ import Ajv from "ajv";
 const ajv = new Ajv({
   errorDataPath: "property",
   allErrors: true,
-  ownProperties: true,
   multipleOfPrecision: 8,
 });
 // add custom formats
@@ -120,24 +119,39 @@ function unwrapErrorHandler(errorHandler) {
   }, {});
 }
 
+function convertPath(path){
+  var result = [];
+  path.split("/").slice(1).forEach(function(elem){
+      if(elem == '#') {
+        continue;
+      }
+      result.push(elem); 
+  });
+  return result;
+}
+
 /**
  * Transforming the error output from ajv to format used by jsonschema.
  * At some point, components should be updated to support ajv.
  */
-function transformAjvErrors(errors = []) {
+function transformAjvErrors(errors = [], schema) {
   if (errors === null) {
     return [];
   }
 
   return errors.map(e => {
-    const { dataPath, keyword, message, params } = e;
+    const { dataPath, keyword, message, params, schemaPath } = e;
     let property = `${dataPath}`;
+
+    var messages = _.get(schema,convertPath(schemaPath));
+    var customMessage = messages ? messages[keyword] : message;
+
 
     // put data in expected format
     return {
       name: keyword,
       property,
-      message,
+      message: customMessage,
       params, // specific to ajv
       e,
       stack: `${property} ${message}`.trim(),
@@ -163,7 +177,7 @@ export default function validateFormData(
     // still get displayed
   }
 
-  let errors = transformAjvErrors(ajv.errors);
+  let errors = transformAjvErrors(ajv.errors, schema);
 
   if (typeof transformErrors === "function") {
     errors = transformErrors(errors);
