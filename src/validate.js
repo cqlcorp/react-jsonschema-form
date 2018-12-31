@@ -126,7 +126,9 @@ function convertPath(path){
         result.push(elem); 
       }
   });
-  return result.pop().push('messages');
+  result.pop();
+  result.push('messages')
+  return result;
 }
 
 /**
