@@ -122,10 +122,9 @@ function unwrapErrorHandler(errorHandler) {
 function convertPath(path){
   var result = [];
   path.split("/").slice(1).forEach(function(elem){
-      if(elem == '#') {
-        continue;
+      if(elem !== '#') {
+        result.push(elem); 
       }
-      result.push(elem); 
   });
   return result;
 }
