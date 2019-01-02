@@ -120,7 +120,7 @@ function unwrapErrorHandler(errorHandler) {
 }
 
 function getPathToMessages(path){
-  path.split("/").slice(1);
+  path = path.split("/").slice(1);
   path.pop();
   path.push('messages');
 
