@@ -1,4 +1,4 @@
-import toPath from "lodash.topath";
+import _ from "lodash";
 import Ajv from "ajv";
 const ajv = new Ajv({
   errorDataPath: "property",
@@ -38,7 +38,7 @@ function toErrorSchema(errors) {
   }
   return errors.reduce((errorSchema, error) => {
     const { property, message } = error;
-    const path = toPath(property);
+    const path = _.toPath(property);
     let parent = errorSchema;
 
     // If the property is at the root (.level1) then toPath creates
@@ -119,24 +119,42 @@ function unwrapErrorHandler(errorHandler) {
   }, {});
 }
 
+function getPathToMessages(path) {
+  if (typeof path !== "string") {
+    return undefined;
+  }
+
+  path = path.split("/").slice(1);
+  path.pop();
+  path.push("messages");
+
+  return path;
+}
+
 /**
  * Transforming the error output from ajv to format used by jsonschema.
  * At some point, components should be updated to support ajv.
  */
-function transformAjvErrors(errors = []) {
+function transformAjvErrors(errors = [], schema) {
   if (errors === null) {
     return [];
   }
 
   return errors.map(e => {
-    const { dataPath, keyword, message, params } = e;
+    const { dataPath, keyword, message, params, schemaPath } = e;
     let property = `${dataPath}`;
+
+    const messagePath = getPathToMessages(schemaPath);
+    const messagesObj = messagePath
+      ? _.get(schema, getPathToMessages(schemaPath))
+      : undefined;
+    const messageToDisplay = messagesObj ? messagesObj[keyword] : message;
 
     // put data in expected format
     return {
       name: keyword,
       property,
-      message,
+      message: messageToDisplay,
       params, // specific to ajv
       stack: `${property} ${message}`.trim(),
     };
@@ -161,7 +179,7 @@ export default function validateFormData(
     // still get displayed
   }
 
-  let errors = transformAjvErrors(ajv.errors);
+  let errors = transformAjvErrors(ajv.errors, schema);
 
   if (typeof transformErrors === "function") {
     errors = transformErrors(errors);
