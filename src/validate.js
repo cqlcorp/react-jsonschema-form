@@ -1,5 +1,4 @@
-import toPath from "lodash.topath";
-import get from "lodash.get";
+import _ from "lodash";
 import Ajv from "ajv";
 const ajv = new Ajv({
   errorDataPath: "property",
@@ -39,7 +38,7 @@ function toErrorSchema(errors) {
   }
   return errors.reduce((errorSchema, error) => {
     const { property, message } = error;
-    const path = toPath(property);
+    const path = _.toPath(property);
     let parent = errorSchema;
 
     // If the property is at the root (.level1) then toPath creates
@@ -147,7 +146,7 @@ function transformAjvErrors(errors = [], schema) {
 
     const messagePath = getPathToMessages(schemaPath);
     const messagesObj = messagePath
-      ? get(schema, getPathToMessages(schemaPath))
+      ? _.get(schema, getPathToMessages(schemaPath))
       : undefined;
     const messageToDisplay = messagesObj ? messagesObj[keyword] : message;
 
