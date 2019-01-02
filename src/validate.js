@@ -1,4 +1,5 @@
 import toPath from "lodash.topath";
+import get from "lodash.get";
 import Ajv from "ajv";
 const ajv = new Ajv({
   errorDataPath: "property",
@@ -119,10 +120,14 @@ function unwrapErrorHandler(errorHandler) {
   }, {});
 }
 
-function getPathToMessages(path){
+function getPathToMessages(path) {
+  if (typeof path !== "string") {
+    return undefined;
+  }
+
   path = path.split("/").slice(1);
   path.pop();
-  path.push('messages');
+  path.push("messages");
 
   return path;
 }
@@ -140,7 +145,10 @@ function transformAjvErrors(errors = [], schema) {
     const { dataPath, keyword, message, params, schemaPath } = e;
     let property = `${dataPath}`;
 
-    const messagesObj = _.get(schema, getPathToMessages(schemaPath));
+    const messagePath = getPathToMessages(schemaPath);
+    const messagesObj = messagePath
+      ? get(schema, getPathToMessages(schemaPath))
+      : undefined;
     const messageToDisplay = messagesObj ? messagesObj[keyword] : message;
 
     // put data in expected format
